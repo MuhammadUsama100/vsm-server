@@ -111,4 +111,3 @@ with open('tfidf-matrx.p', 'wb') as fp:
 
 with open('doc-dictionary.p', 'wb') as fp:
     pickle.dump(processed_array, fp, protocol=pickle.HIGHEST_PROTOCOL)
-

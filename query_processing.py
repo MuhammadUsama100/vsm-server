@@ -30,12 +30,12 @@ query = "picked news phrases"
 
 # tokenizer = RegexpTokenizer(r'\w+')
 query = query.lower()
-# tokenizer = RegexpTokenizer(r'\w+')
-# tokens = tokenizer.tokenize(query)
-tokens = nltk.word_tokenize(query)
+tokenizer = RegexpTokenizer(r'\w+')
+tokens = tokenizer.tokenize(query)
+# tokens = nltk.word_tokenize(query)
 lema_tokens = []
 for token in tokens:
-    lema_tokens.append(ps.stem(lemmatizer.lemmatize(token)))
+    lema_tokens.append(lemmatizer.lemmatize(token))
 filtered_query_tokens = [
     word for word in lema_tokens if not word in stop_words]
 
