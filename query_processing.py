@@ -16,8 +16,21 @@ with open('tfidf-matrx.p', 'rb') as fp:
 with open('doc-dictionary.p', 'rb') as fp:
     processed_array = pickle.load(fp)
 
+
+with open('inverse-doc.p', 'rb') as fp:
+    inverse_doc_frequency = pickle.load(fp)
+
 lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
+file2 = open(
+    "G:/University/SEMESTER/SIXSEMESTER/IR/assignment/ass2/stopwords.txt", 'r',  encoding='utf8')
+lines = file2.readlines()
+# creating a list of stop word each word is strip before adding to stop word list
+stopwords = []
+
+for i in lines:
+    if(i.rstrip("\n") != ""):
+        stopwords.append(i.rstrip("\n").strip())
+print(stopwords)
 
 
 def process_query(queryString):
@@ -39,15 +52,21 @@ def process_query(queryString):
     for token in tokens:
         lema_tokens.append(lemmatizer.lemmatize(token))
     filtered_query_tokens = [
-        word for word in lema_tokens if not word in stop_words]
+        word for word in lema_tokens if not word in stopwords]
 
     for term in query_frequency:
         if term in filtered_query_tokens:
             query_frequency[term] = query_frequency[term] + 1
 
+    # for term in inverse_doc_frequency:
+    #     query_frequency[term] = query_frequency[term] * \
+    #         inverse_doc_frequency[term]
+
+    print(len(query_frequency))
+
     #TF = log(1+tf)
-    for term in query_frequency:
-        query_frequency[term] = math.log10(1+query_frequency[term])
+    # for term in query_frequency:
+    #     query_frequency[term] = math.log10(1+query_frequency[term])
 
     #TF = 1+log(tf)
     # for term in query_frequency:
@@ -62,7 +81,7 @@ def process_query(queryString):
     # print(max_val)
     # for term in query_frequency:
     #     query_frequency[term] = 0.5 + (0.5*(0 if query_frequency[term]
-    #                                         == 0 else math.log10(query_frequency[term])) / max_val)
+    #                                           == 0 else math.log10(query_frequency[term])) / max_val)
 
     # length normalize
     length_doc: list = []
@@ -93,14 +112,19 @@ def process_query(queryString):
 
     print(result_set[0][1] - result_set[1][1])
     count = 0
+
+    y = []
     for index in range(0, len(result_set)-1):
         if(index+1 == len(result_set)):
             continue
-        if abs(result_set[index][1]-result_set[0][1]) <= 0.05 or index == 0:
+        if result_set[index][1] >= 0.005 or index == 0:
             print("result doc # {} => {} , test=> {}".format(
                 result_set[index][0], result_set[index][1], abs(result_set[index][1]-result_set[0][1])))
             count = count + 1
+            y.append(result_set[index][0])
     print(count)
+    y.sort()
+    print(y)
 
 
 questions:  list = [
@@ -115,4 +139,5 @@ questions:  list = [
     "french pine herbs",  # 9
     "picked news phrases"  # 10
 ]
+
 process_query(questions[7-1])

@@ -15,7 +15,18 @@ for i in range(1, 51):
         "G:/University/SEMESTER/SIXSEMESTER/IR/assignment/ass2/ShortStories/" + str(i) + ".txt", 'r',  encoding='utf8')
     Lines = file1.readlines()
     array.append(Lines)
-stop_words = set(stopwords.words('english'))
+
+file2 = open(
+    "G:/University/SEMESTER/SIXSEMESTER/IR/assignment/ass2/stopwords.txt", 'r',  encoding='utf8')
+lines = file2.readlines()
+# creating a list of stop word each word is strip before adding to stop word list
+stopwords = []
+
+for i in lines:
+    if(i.rstrip("\n") != ""):
+        stopwords.append(i.rstrip("\n").strip())
+print(stopwords)
+
 
 lemmatizer = WordNetLemmatizer()
 ps = PorterStemmer()
@@ -30,7 +41,7 @@ def preprocessing(sentence):
     lema_tokens = []
     for token in tokens:
         lema_tokens.append(lemmatizer.lemmatize(token))
-    filtered_tokens = [word for word in lema_tokens if not word in stop_words]
+    filtered_tokens = [word for word in lema_tokens if not word in stopwords]
     return filtered_tokens
 
 
@@ -63,10 +74,10 @@ for doc_number in range(0, len(processed_array)):
             term_frequency_matrix[doc_number][term] = term_frequency_matrix[doc_number][term] + 1
 
 # TF = log(1 + tf)
-for doc_number in term_frequency_matrix:
-    for term in term_frequency_matrix[doc_number]:
-        term_frequency_matrix[doc_number][term] = math.log10(
-            1 + term_frequency_matrix[doc_number][term])
+# for doc_number in term_frequency_matrix:
+#     for term in term_frequency_matrix[doc_number]:
+#         term_frequency_matrix[doc_number][term] = math.log10(
+#             1 + term_frequency_matrix[doc_number][term])
 
 #TF = 1 + ln(tf)
 # for doc_number in term_frequency_matrix:
@@ -84,7 +95,6 @@ for doc_number in term_frequency_matrix:
 #         term_frequency_matrix[doc_number][term] = 0.5 + ((
 #             0.5*term_frequency_matrix[doc_number][term])/max_val)
 #     max_val = -1
-
 
 # calculating idf score
 inverse_doc_frequency: dict = {}
@@ -143,3 +153,6 @@ with open('tfidf-matrx.p', 'wb') as fp:
 
 with open('doc-dictionary.p', 'wb') as fp:
     pickle.dump(processed_array, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
+with open('inverse-doc.p', 'wb') as fp:
+    pickle.dump(inverse_doc_frequency, fp, protocol=pickle.HIGHEST_PROTOCOL)
