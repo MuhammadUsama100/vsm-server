@@ -6,6 +6,8 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import pickle
 from nltk.stem import PorterStemmer
+import copy
+
 
 array: list = []
 for i in range(1, 51):
@@ -60,6 +62,29 @@ for doc_number in range(0, len(processed_array)):
         if term in term_frequency_matrix[doc_number]:
             term_frequency_matrix[doc_number][term] = term_frequency_matrix[doc_number][term] + 1
 
+# TF = log(1 + tf)
+for doc_number in term_frequency_matrix:
+    for term in term_frequency_matrix[doc_number]:
+        term_frequency_matrix[doc_number][term] = math.log10(
+            1 + term_frequency_matrix[doc_number][term])
+
+#TF = 1 + ln(tf)
+# for doc_number in term_frequency_matrix:
+#     for term in term_frequency_matrix[doc_number]:
+#         term_frequency_matrix[doc_number][term] = 1 + (0 if term_frequency_matrix[doc_number][term] == 0 else math.log10(
+#             term_frequency_matrix[doc_number][term]))
+
+# TF = 0.5 + 0.5*log(tf)/max(tf)
+# max_val = -1
+# for doc_number in term_frequency_matrix:
+#     for term in term_frequency_matrix[doc_number]:
+#         if term_frequency_matrix[doc_number][term] > max_val:
+#             max_val = term_frequency_matrix[doc_number][term]
+#     for term in term_frequency_matrix[doc_number]:
+#         term_frequency_matrix[doc_number][term] = 0.5 + ((
+#             0.5*term_frequency_matrix[doc_number][term])/max_val)
+#     max_val = -1
+
 
 # calculating idf score
 inverse_doc_frequency: dict = {}
@@ -76,12 +101,12 @@ for doc in processed_array:
 
 # formula for idf  =  log(df)/N
 for term in inverse_doc_frequency:
-    inverse_doc_frequency[term] = math.log10(inverse_doc_frequency[term]) / 50
+    inverse_doc_frequency[term] = math.log10(inverse_doc_frequency[term])/50
 
 
 # calculating tf-idf formula = tf * idf calculated above
 
-tf_idf_matrix: dict = term_frequency_matrix
+tf_idf_matrix: dict = copy.deepcopy(term_frequency_matrix)
 
 for doc_number in tf_idf_matrix:
     for term in inverse_doc_frequency:
@@ -101,8 +126,15 @@ for doc_number in tf_idf_matrix:
             math.sqrt(sum(length_doc))
 
 # print(tf_idf_matrix)
-
 f = open("tf.txt", "w")
+f.write(str(term_frequency_matrix))
+f.close()
+
+f = open("idf.txt", "w")
+f.write(str(inverse_doc_frequency))
+f.close()
+
+f = open("tfidf-matrix.txt", "w")
 f.write(str(tf_idf_matrix))
 f.close()
 

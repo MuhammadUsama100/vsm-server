@@ -19,56 +19,100 @@ with open('doc-dictionary.p', 'rb') as fp:
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
-# queryprocessing
-query_frequency: dict = {}
-for doc in processed_array:
-    for term in doc:
-        if term not in query_frequency:
-            query_frequency[term] = 0
 
-query = "picked news phrases"
+def process_query(queryString):
+    # queryprocessing
+    query_frequency: dict = {}
+    for doc in processed_array:
+        for term in doc:
+            if term not in query_frequency:
+                query_frequency[term] = 0
 
-# tokenizer = RegexpTokenizer(r'\w+')
-query = query.lower()
-tokenizer = RegexpTokenizer(r'\w+')
-tokens = tokenizer.tokenize(query)
-# tokens = nltk.word_tokenize(query)
-lema_tokens = []
-for token in tokens:
-    lema_tokens.append(lemmatizer.lemmatize(token))
-filtered_query_tokens = [
-    word for word in lema_tokens if not word in stop_words]
+    query = queryString
+
+    # tokenizer = RegexpTokenizer(r'\w+')
+    query = query.lower()
+    tokenizer = RegexpTokenizer(r'\w+')
+    tokens = tokenizer.tokenize(query)
+    # tokens = nltk.word_tokenize(query)
+    lema_tokens = []
+    for token in tokens:
+        lema_tokens.append(lemmatizer.lemmatize(token))
+    filtered_query_tokens = [
+        word for word in lema_tokens if not word in stop_words]
+
+    for term in query_frequency:
+        if term in filtered_query_tokens:
+            query_frequency[term] = query_frequency[term] + 1
+
+    #TF = log(1+tf)
+    for term in query_frequency:
+        query_frequency[term] = math.log10(1+query_frequency[term])
+
+    #TF = 1+log(tf)
+    # for term in query_frequency:
+    #     query_frequency[term] = 1 + (0 if query_frequency[term]
+    #                                  == 0 else math.log10(query_frequency[term]))
+
+    #TF = 0.5 + 0.5*log(tf)/max(tf)
+    # max_val = -1
+    # for term in query_frequency:
+    #     if max_val < query_frequency[term]:
+    #         max_val = query_frequency[term]
+    # print(max_val)
+    # for term in query_frequency:
+    #     query_frequency[term] = 0.5 + (0.5*(0 if query_frequency[term]
+    #                                         == 0 else math.log10(query_frequency[term])) / max_val)
+
+    # length normalize
+    length_doc: list = []
+    for term in query_frequency:
+        length_doc.append(
+            query_frequency[term] * query_frequency[term])
+    for term in query_frequency:
+        query_frequency[term] = query_frequency[term] / \
+            math.sqrt(sum(length_doc))
+
+    print(filtered_query_tokens)
+
+    result: dict = {}
+    for doc_number in tf_idf_matrix:
+        result[doc_number] = 0
+        dot_product: list = []
+        for term in tf_idf_matrix[doc_number]:
+            dot_product.append(
+                tf_idf_matrix[doc_number][term] * query_frequency[term])
+        result[doc_number] = sum(dot_product)
+
+    result = dict(sorted(result.items(), key=lambda val: val[1], reverse=True))
+
+    result_set: list = []
+    for i in result:
+        if result[i] > 0:
+            result_set.append((i+1, result[i]))
+
+    print(result_set[0][1] - result_set[1][1])
+    count = 0
+    for index in range(0, len(result_set)-1):
+        if(index+1 == len(result_set)):
+            continue
+        if abs(result_set[index][1]-result_set[0][1]) <= 0.05 or index == 0:
+            print("result doc # {} => {} , test=> {}".format(
+                result_set[index][0], result_set[index][1], abs(result_set[index][1]-result_set[0][1])))
+            count = count + 1
+    print(count)
 
 
-for term in query_frequency:
-    if term in filtered_query_tokens:
-        query_frequency[term] = query_frequency[term] + 1
-
-# length normalize
-length_doc: list = []
-for term in query_frequency:
-    length_doc.append(
-        query_frequency[term] * query_frequency[term])
-for term in query_frequency:
-    query_frequency[term] = query_frequency[term] / \
-        math.sqrt(sum(length_doc))
-
-print(filtered_query_tokens)
-
-
-result: dict = {}
-for doc_number in tf_idf_matrix:
-    result[doc_number] = 0
-    dot_product: list = []
-    for term in tf_idf_matrix[doc_number]:
-        dot_product.append(
-            tf_idf_matrix[doc_number][term] * query_frequency[term])
-    result[doc_number] = sum(dot_product)
-
-
-# print(result)
-
-for i in result:
-    if result[i] > 0 and result[i] < 0.005:
-        print(i+1)
-        print(result[i])
+questions:  list = [
+    "sent due",  # 1
+    "walked quickly",  # 2
+    "face of agony",  # 3
+    "little unsteadily",  # 4
+    "across adventures",  # 5
+    "several nervous neighbourhood",  # 6
+    "master jacket",  # 7
+    "really love painter",  # 8
+    "french pine herbs",  # 9
+    "picked news phrases"  # 10
+]
+process_query(questions[7-1])
