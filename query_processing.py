@@ -1,4 +1,5 @@
-
+from flask_cors import CORS, cross_origin
+from flask import Flask, request
 import math
 import pickle
 import nltk
@@ -17,12 +18,13 @@ with open('doc-dictionary.p', 'rb') as fp:
     processed_array = pickle.load(fp)
 
 
-with open('inverse-doc.p', 'rb') as fp:
-    inverse_doc_frequency = pickle.load(fp)
+# with open('inverse-doc.p', 'rb') as fp:
+#     inverse_doc_frequency = pickle.load(fp)
 
 lemmatizer = WordNetLemmatizer()
 file2 = open(
-    "G:/University/SEMESTER/SIXSEMESTER/IR/assignment/ass2/stopwords.txt", 'r',  encoding='utf8')
+    "stopwords.txt", 'r',  encoding='utf8')
+
 lines = file2.readlines()
 # creating a list of stop word each word is strip before adding to stop word list
 stopwords = []
@@ -113,7 +115,9 @@ def process_query(queryString):
     print(result_set[0][1] - result_set[1][1])
     count = 0
 
-    y = []
+    finalresult = {}
+    finalresult["result-doc-set"] = []
+    finalresult["result-set"] = []
     for index in range(0, len(result_set)-1):
         if(index+1 == len(result_set)):
             continue
@@ -121,10 +125,13 @@ def process_query(queryString):
             print("result doc # {} => {} , test=> {}".format(
                 result_set[index][0], result_set[index][1], abs(result_set[index][1]-result_set[0][1])))
             count = count + 1
-            y.append(result_set[index][0])
-    print(count)
-    y.sort()
-    print(y)
+            finalresult["result-set"].append(
+                {result_set[index][0]: result_set[index][1]})
+            finalresult["result-doc-set"].append(result_set[index][0])
+
+    finalresult["total-doc-retrived"] = count
+    finalresult["result-doc-set"].sort()
+    return finalresult
 
 
 questions:  list = [
@@ -140,4 +147,22 @@ questions:  list = [
     "picked news phrases"  # 10
 ]
 
-process_query(questions[7-1])
+# process_query(questions[7-1])
+
+
+app = Flask(__name__)
+
+CORS(app)
+app.debug = True
+# this is a flask route which takes a query and returns a value that is used in the frontend to display the user the result
+@app.route('/process-query', methods=['POST'])
+@cross_origin()
+def process():
+    try:
+        if request.method == 'POST':
+            q = str(request.get_json()["query"]).lower().strip()
+            print(q)
+            result = process_query(q)
+            return {"resultset": result}
+    except:
+        return {"err": str("ERROR DUE TO INVALID QUERY")}
