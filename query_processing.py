@@ -5,10 +5,10 @@ import pickle
 import nltk
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
 import pickle
 from nltk.stem import PorterStemmer
 ps = PorterStemmer()
+nltk.download()
 
 with open('tfidf-matrx.p', 'rb') as fp:
     tf_idf_matrix = pickle.load(fp)
