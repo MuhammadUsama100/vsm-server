@@ -152,11 +152,11 @@ questions:  list = [
 
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, support_credentials=True)
 app.debug = True
 # this is a flask route which takes a query and returns a value that is used in the frontend to display the user the result
 @app.route('/process-query', methods=['POST'])
-@cross_origin()
+@cross_origin(supports_credentials=True)
 def process():
     try:
         if request.method == 'POST':
