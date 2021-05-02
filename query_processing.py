@@ -8,7 +8,7 @@ from nltk.stem import WordNetLemmatizer
 import pickle
 from nltk.stem import PorterStemmer
 ps = PorterStemmer()
-nltk.download()
+# nltk.download()
 
 with open('tfidf-matrx.p', 'rb') as fp:
     tf_idf_matrix = pickle.load(fp)
@@ -66,16 +66,16 @@ def process_query(queryString):
 
     print(len(query_frequency))
 
-    #TF = log(1+tf)
+    # TF = log(1+tf)
     # for term in query_frequency:
     #     query_frequency[term] = math.log10(1+query_frequency[term])
 
-    #TF = 1+log(tf)
+    # TF = 1+log(tf)
     # for term in query_frequency:
     #     query_frequency[term] = 1 + (0 if query_frequency[term]
     #                                  == 0 else math.log10(query_frequency[term]))
 
-    #TF = 0.5 + 0.5*log(tf)/max(tf)
+    # TF = 0.5 + 0.5*log(tf)/max(tf)
     # max_val = -1
     # for term in query_frequency:
     #     if max_val < query_frequency[term]:
@@ -152,7 +152,7 @@ questions:  list = [
 
 app = Flask(__name__)
 
-CORS(app, support_credentials=True)
+CORS(app, support_credentials=True, resources={r"/*": {"origins": "*"}})
 app.debug = True
 # this is a flask route which takes a query and returns a value that is used in the frontend to display the user the result
 @app.route('/process-query', methods=['POST'])
